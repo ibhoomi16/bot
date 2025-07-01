@@ -1,0 +1,17 @@
+# Python virtual environment
+venv/
+
+# Generated Federated Learning output directories
+client_updates/
+global_models/
+
+# Python cache files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Entire Phase 2 dataset folder - Excluded from Git due to size
+dataset/phase2/
+datset/phase1/
+
