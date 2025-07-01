@@ -1,0 +1,2 @@
+dataset/phase2/data/mouse_movements/bots/*.json filter=lfs diff=lfs merge=lfs -text
+dataset/phase2/data/mouse_movements/humans/*.json filter=lfs diff=lfs merge=lfs -text
