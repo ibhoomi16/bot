@@ -1,4 +1,3 @@
-# bot-detector/client.py
 
 import os
 import pandas as pd
@@ -13,10 +12,9 @@ import pickle
 from cryptography.fernet import Fernet # For symmetric encryption
 
 # --- Configuration ---
-BASE_PARTITION_DIR = 'dataset/partition' # Relative path to the partition folder
-PHASE = 'phase1' # Using phase1 as per our detailed discussions
+BASE_PARTITION_DIR = 'dataset/partition'
+PHASE = 'phase1'
 
-# NEW: Directory for client updates
 CLIENT_UPDATES_DIR = 'client_updates'
 
 # --- Encryption Key (IMPORTANT: In a real system, this key should be securely shared/managed) ---
@@ -27,7 +25,7 @@ ENCRYPTION_KEY = b'BxvBWlI4M2KYqy_q0ituuVCxq-sibLYhCyYFJlxYuRc=' # Placeholder, 
 # --- Differential Privacy Configuration ---
 DP_NOISE_SCALE = 0.1 # Adjust this value: higher means more privacy, but less utility
 
-# --- Helper Functions (No changes to these) ---
+# --- Helper Functions ---
 def parse_web_log_entry(log_entry):
     """Parses a single Apache-like web log entry to extract relevant features."""
     match = re.match(r'(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}) - - \[(.*?)\] "(.*?)" (\d+) (\d+) "(.*?)" "(.*?)" "PHPSESSID=(.*?)"', log_entry)
@@ -159,36 +157,39 @@ def extract_web_log_features(web_logs_list):
 
 # --- Client Logic ---
 
-def load_client_data(client_id):
-    """Loads and preprocesses data for a single client, including all bot types as per dataset structure."""
+def load_partition_data(client_id, annotation_split_type='train'):
+    """
+    Loads and preprocesses data for a single client, based on a specified annotation split type ('train' or 'test').
+    This function ensures that only raw data (web logs and mouse movements) corresponding to the
+    selected annotation_split_type's session IDs are loaded and processed.
+    """
+    if annotation_split_type not in ['train', 'test']:
+        raise ValueError("annotation_split_type must be 'train' or 'test'")
+
     client_base_path = os.path.join(BASE_PARTITION_DIR, client_id, PHASE)
 
-    all_annotations_dfs = []
-    session_ids_to_process = set()
-
+    # --- Step 1: Load Session IDs from Annotation Files (This defines the 'split') ---
+    annotations_dfs = []
     annotation_subfolders = ['humans_and_advanced_bots', 'humans_and_moderate_bots']
 
     for current_subfolder in annotation_subfolders:
-        train_annotation_path = os.path.join(client_base_path, 'annotations', current_subfolder, 'train')
-        test_annotation_path = os.path.join(client_base_path, 'annotations', current_subfolder, 'test')
+        annotation_path = os.path.join(client_base_path, 'annotations', current_subfolder, annotation_split_type)
+        if os.path.exists(annotation_path):
+            annotations_dfs.append(pd.read_csv(annotation_path, sep=' ', header=None, names=['session_id', 'label']))
+    
+    if not annotations_dfs:
+        print(f"[{client_id}] No '{annotation_split_type}' annotation files found. Cannot load data.")
+        return pd.DataFrame(), pd.Series(), [], {} # Return empty data and empty label_mapping
 
-        if os.path.exists(train_annotation_path):
-            all_annotations_dfs.append(pd.read_csv(train_annotation_path, sep=' ', header=None, names=['session_id', 'label']))
-        if os.path.exists(test_annotation_path):
-            all_annotations_dfs.append(pd.read_csv(test_annotation_path, sep=' ', header=None, names=['session_id', 'label']))
+    annotations_df_selected_split = pd.concat(annotations_dfs).drop_duplicates(subset=['session_id'])
+    # This list now contains ONLY the session IDs for the chosen 'train' or 'test' split.
+    session_ids_to_process = annotations_df_selected_split['session_id'].tolist()
 
-    if not all_annotations_dfs:
-        print(f"[{client_id}] No annotation files found. Cannot load data.")
-        return pd.DataFrame(), pd.Series(), []
+    print(f"[{client_id}] Loaded {len(session_ids_to_process)} unique sessions from '{annotation_split_type}' annotations.")
 
-    annotations_df = pd.concat(all_annotations_dfs).drop_duplicates(subset=['session_id'])
-    session_ids_to_process.update(annotations_df['session_id'].tolist())
-
-    print(f"[{client_id}] Loaded {len(session_ids_to_process)} unique sessions from all annotation types.")
-
+    # --- Step 2: Load Web Logs (and filter by 'session_ids_to_process') ---
     all_web_logs = {}
     web_log_base_path = os.path.join(client_base_path, 'data', 'web_logs')
-
     log_subfolders = ['bots', 'humans']
     for subfolder in log_subfolders:
         current_log_path = os.path.join(web_log_base_path, subfolder)
@@ -199,6 +200,7 @@ def load_client_data(client_id):
                 with open(file_path, 'r') as f:
                     for line in f:
                         parsed_log = parse_web_log_entry(line.strip())
+                        # This 'if' condition is the filter: only process logs for selected session IDs
                         if parsed_log and parsed_log['session_id'] in session_ids_to_process:
                             if parsed_log['session_id'] not in all_web_logs:
                                 all_web_logs[parsed_log['session_id']] = []
@@ -206,15 +208,16 @@ def load_client_data(client_id):
         else:
             print(f"[{client_id}] Web logs directory not found: {current_log_path}")
 
+    # --- Step 3: Load Mouse Movements (and filter by 'session_ids_to_process') ---
     all_mouse_movements = {}
     mouse_movement_data_base_path = os.path.join(client_base_path, 'data', 'mouse_movements')
-
     for current_mm_type in annotation_subfolders:
         mouse_movement_path = os.path.join(mouse_movement_data_base_path, current_mm_type)
         if os.path.exists(mouse_movement_path):
             session_folders = [d for d in os.listdir(mouse_movement_path) if os.path.isdir(os.path.join(mouse_movement_path, d))]
             for session_folder in tqdm(session_folders, desc=f"[{client_id}] Reading {current_mm_type} Mouse Movements"):
                 session_id = session_folder
+                # This 'if' condition is the filter: only process mouse movements for selected session IDs
                 if session_id in session_ids_to_process:
                     json_file_path = os.path.join(mouse_movement_path, session_folder, 'mouse_movements.json')
                     if os.path.exists(json_file_path):
@@ -229,15 +232,16 @@ def load_client_data(client_id):
         else:
             print(f"[{client_id}] Mouse movements directory not found: {mouse_movement_path}")
 
+    # --- Step 4: Feature Engineering and Merging for the selected split data ---
     features_list = []
     labels_list = []
 
-    print(f"[{client_id}] Extracting features for all combined sessions...")
+    print(f"[{client_id}] Extracting features for '{annotation_split_type}' sessions...")
     for session_id in tqdm(list(session_ids_to_process), desc=f"[{client_id}] Extracting Features"):
         mouse_feats = extract_mouse_movement_features(all_mouse_movements.get(session_id, {}))
         web_log_feats = extract_web_log_features(all_web_logs.get(session_id, []))
 
-        label_row = annotations_df[annotations_df['session_id'] == session_id]
+        label_row = annotations_df_selected_split[annotations_df_selected_split['session_id'] == session_id]
         if label_row.empty:
             continue
 
@@ -267,7 +271,7 @@ def load_client_data(client_id):
             except ValueError:
                 X = X.drop(columns=[col])
 
-    return X, y, list(X.columns)
+    return X, y, list(X.columns), label_mapping # Return label_mapping as well
 
 def apply_differential_privacy(data_array, noise_scale):
     """
@@ -292,7 +296,8 @@ def run_client_training(client_id, round_num, global_model_params=None):
     """
     print(f"\n--- Client {client_id} (Round {round_num}) ---")
 
-    X, y, feature_names = load_client_data(client_id)
+    # MODIFIED: Load ONLY 'train' data for local training
+    X, y, feature_names, label_mapping = load_partition_data(client_id, 'train')
 
     if X.empty or len(y.unique()) < 2:
         print(f"[{client_id}] Not enough data or classes to train model. Skipping round.")
@@ -307,7 +312,8 @@ def run_client_training(client_id, round_num, global_model_params=None):
         feature_names = expected_features
 
     print(f"[{client_id}] Training local model...")
-    X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
+    # X_val here is a split of the local training data (which is from original 'train' annotations)
+    X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.2, random_state=42) # Removed stratify=y
 
     model = RandomForestClassifier(n_estimators=100, random_state=42, class_weight='balanced')
     model.fit(X_train, y_train)
@@ -315,6 +321,12 @@ def run_client_training(client_id, round_num, global_model_params=None):
     y_pred = model.predict(X_val)
     print(f"[{client_id}] Local Model Performance (Round {round_num}):")
     print(f"Accuracy: {accuracy_score(y_val, y_pred):.4f}")
+
+    # Print full classification report for local model on its validation set
+    target_names = [k for k, v in sorted(label_mapping.items(), key=lambda item: item[1])]
+    print("Classification Report (Local Validation Set):")
+    print(classification_report(y_val, y_pred, target_names=target_names, labels=[0, 1, 2], zero_division=0)) # Added labels and zero_division
+
 
     original_importances = np.array(model.feature_importances_)
     noisy_importances = apply_differential_privacy(original_importances, DP_NOISE_SCALE)
@@ -330,8 +342,7 @@ def run_client_training(client_id, round_num, global_model_params=None):
     encrypted_update = encrypt_data(model_update_payload, ENCRYPTION_KEY)
     print(f"[{client_id}] Encrypted model update.")
 
-    # Modified: Save encrypted update to the new client_updates directory
-    os.makedirs(CLIENT_UPDATES_DIR, exist_ok=True) # Ensure directory exists
+    os.makedirs(CLIENT_UPDATES_DIR, exist_ok=True)
     update_filename = os.path.join(CLIENT_UPDATES_DIR, f"client_update_{client_id}_round_{round_num}.enc")
     with open(update_filename, 'wb') as f:
         f.write(encrypted_update)
@@ -348,7 +359,6 @@ if __name__ == "__main__":
     client_id = sys.argv[1]
     round_num = int(sys.argv[2]) if len(sys.argv) > 2 else 1
 
-    # Modified: Load global model from the new global_models directory
     global_params_path = os.path.join('global_models', f"global_model_params_round_{round_num-1}.pkl") if round_num > 1 else None
     global_params = None
     if global_params_path and os.path.exists(global_params_path):
