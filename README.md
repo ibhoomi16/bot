@@ -8,6 +8,7 @@ Retailers face a **common, evolving enemy** but fight the battle alone, often st
 o mimic a real-world multi-retailer scenario, this project simulates three separate retailers, each acting as an independent Federated Learning client:
 
 Client 1: Represents Retailer A 
+
 Client 2: Represents Retailer B 
 
 Client 3: Represents Retailer C 
@@ -31,20 +32,43 @@ Web bot detection dataset includes:
 
 ```
 bot-detector/
+├── client.py                  # Client-side FL logic
+├── server.py                  # Server-side FL logic
+├── run.py                     # FL runner script
+├── run_federated_learning.py  # Master orchestration script
+├── README.md                  # Project documentation
+├── venv/                      # Virtual environment (ignored by Git)
+│
 ├── dataset/
-│   ├── partition/           # Client-wise partitioned data
-│   └── phase2/              # (Download separately)
-├── client_updates/          # Encrypted model updates per round
-├── global_models/           # Aggregated global models
+│   ├── partition/
+│   │   ├── client_1/
+│   │   │   └── phase1/
+│   │   │       ├── annotations/
+│   │   │       └── data/
+│   │   ├── client_2/
+│   │   │   └── phase1/
+│   │   │       ├── annotations/
+│   │   │       └── data/
+│   │   └── client_3/
+│   │       └── phase1/
+│   │           ├── annotations/
+│   │           └── data/
+│   └── phase2/                # Download separately
+│       ├── annotations/
+│       └── data/
+│
+├── client_updates/            # Encrypted updates from clients
+│   ├── client_update_client_1_round_1.enc
+│   └── ...
+│
+├── global_models/             # Aggregated global model files
+│   ├── global_model_params_round_1.pkl
+│   └── ...
+│
 ├── scripts/
-│   ├── fed_split.py         # Optional: Partitioning script
-│   ├── key.py               # Generates encryption key
-│   └── run.py               # FL simulation logic
-├── client.py                # Client logic
-├── server.py                # Server logic
-├── run.py
-├── README.md
-├── venv/                    # Virtual environment (ignored by Git)
+│   ├── fed_split.py           # Optional partitioning script
+│   ├── key.py                 # Encryption key generator
+│   └── run.py                 # Simulation control script
 
 
 
