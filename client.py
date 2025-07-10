@@ -10,7 +10,7 @@ from sklearn.metrics import classification_report, accuracy_score
 from tqdm import tqdm
 import pickle
 from cryptography.fernet import Fernet # For symmetric encryption
-
+from xgboost import XGBClassifier
 # --- Configuration ---
 BASE_PARTITION_DIR = 'dataset/partition'
 PHASE = 'phase1'
@@ -315,8 +315,9 @@ def run_client_training(client_id, round_num, global_model_params=None):
     # X_val here is a split of the local training data (which is from original 'train' annotations)
     X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.2, random_state=42) # Removed stratify=y
 
-    model = RandomForestClassifier(n_estimators=100, random_state=42, class_weight='balanced')
+    model = XGBClassifier(n_estimators=100, learning_rate=0.1, max_depth=5, use_label_encoder=False, eval_metric='mlogloss', random_state=42)
     model.fit(X_train, y_train)
+
 
     y_pred = model.predict(X_val)
     print(f"[{client_id}] Local Model Performance (Round {round_num}):")

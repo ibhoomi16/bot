@@ -471,9 +471,12 @@ if __name__ == "__main__":
         # --- Evaluate the Global Model ---
         output_lines.append(f"\n--- Evaluating Global Model's Performance on Combined Phase 1 'test' Sets ---")
         
-        global_eval_model = RandomForestClassifier(n_estimators=100, random_state=42, class_weight='balanced')
-        
-        global_eval_model.fit(X_global_test_aligned, y_global_test_raw)
+        import joblib
+        global_eval_model = joblib.load('model/global_model.joblib')
+
+        print("Test shape:", X_global_test_aligned.shape, y_global_test_raw.shape)
+        print("Test label distribution:", y_global_test_raw.value_counts())
+        print("First 10 test session IDs:", X_global_test_aligned.index[:10])
 
         y_pred_global = global_eval_model.predict(X_global_test_aligned)
         
