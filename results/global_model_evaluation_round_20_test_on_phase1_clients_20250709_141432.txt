@@ -1,0 +1,34 @@
+Loaded global model from round 20 with 31 features.
+Evaluating on Phase 1 'test' data from all clients: ['client_1', 'client_2', 'client_3'] (these clients also participated in training).
+
+--- Evaluating Global Model's Performance on Combined Phase 1 'test' Sets ---
+Global Model Evaluation (Round 20):
+Total Samples in Combined Phase 1 'test' Set: 35
+Accuracy: 0.9143
+F1-Score (macro): 0.8372
+Precision (macro): 0.9086
+Recall (macro): 0.8000
+
+Classification Report (Combined Phase 1 'test' Set):
+              precision    recall  f1-score   support
+
+       human       0.93      1.00      0.96        25
+moderate_bot       0.80      0.80      0.80         5
+advanced_bot       1.00      0.60      0.75         5
+
+    accuracy                           0.91        35
+   macro avg       0.91      0.80      0.84        35
+weighted avg       0.92      0.91      0.91        35
+
+
+Top 10 Most Important Features from Final Global Model:
+- num_moves: 0.2625
+- num_left_clicks: 0.2490
+- avg_time_between_moves: 0.2351
+- num_200_ok: 0.1461
+- total_actions: 0.1009
+- std_speed: 0.0804
+- straightness: 0.0794
+- max_y: 0.0697
+- avg_status_code: 0.0674
+- std_time_between_moves: 0.0567

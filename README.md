@@ -1,138 +1,249 @@
 
-# 🧠 Federated Learning for Grinch Bot Detection  
-**Collaborative Defense Against Evolving Online Threats**
+# 🤖 Bot Detection System - Federated Learning
 
-This project demonstrates a simulated **Federated Learning (FL)** system designed to detect **"Grinch Bots"** – automated programs that flood online stores to snatch up limited items. The core idea is to enable multiple retailers to collaboratively train a powerful bot detection model **without ever sharing their sensitive customer data**.
+A sophisticated bot detection system using federated learning to identify "Grinch bots" while preserving data privacy across multiple retailers.
 
-Retailers face a **common, evolving enemy** but fight the battle alone, often struggling to keep up.
-o mimic a real-world multi-retailer scenario, this project simulates three separate retailers, each acting as an independent Federated Learning client:
+## 🎯 Overview
 
-Client 1: Represents Retailer A 
+This system detects sophisticated automated bots that:
+- Flood online stores during high-demand periods
+- Automatically purchase limited items before humans can access them
+- Use advanced techniques to mimic human behavior
+- Resell items at inflated prices
 
-Client 2: Represents Retailer B 
+## 🚀 Features
 
-Client 3: Represents Retailer C 
+### ✅ **Advanced Detection**
+- **Machine Learning Model**: RandomForest classifier with 11 key features
+- **Real-time Analysis**: Instant bot/human classification
+- **Confidence Scoring**: Probability-based predictions
+- **Feature Importance**: Shows which behaviors indicate bot activity
 
-## 🧠 The Solution: Collective Learning Without Sharing Data
-Federated Learning enables retailers to share what they **learn** (model updates) rather than raw customer data.
+### ✅ **Privacy-Preserving Federated Learning**
+- **Local Training**: Each retailer trains on their own data
+- **Model Sharing**: Only model updates are shared (not raw data)
+- **Collaborative Learning**: Multiple retailers improve detection together
+- **Data Protection**: Raw customer data never leaves the organization
 
+### ✅ **Web Interface**
+- **Flask Backend**: RESTful API with HTML interface
+- **React Frontend**: Modern UI with real-time updates
+- **Sample Data**: Built-in test data for demonstration
+- **JSON Validation**: Automatic data formatting and validation
 
-## 📚 Dataset
-Web bot detection dataset includes:
-- Humans
-- Moderate bots (browser fingerprints)
-- Advanced bots (human-like behavior)
+## 📊 Model Features
 
-##  Extract the dataset and place it under:  
-`bot-detector/dataset
+The system analyzes 11 key behavioral features:
 
----
+| Feature | Description |
+|---------|-------------|
+| `total_session_duration` | Total time of user session |
+| `avg_time_between_moves` | Average time between mouse movements |
+| `num_left_clicks` | Number of left mouse clicks |
+| `total_distance` | Total mouse movement distance |
+| `avg_bytes_sent` | Average data transferred per request |
+| `avg_status_code` | Average HTTP status codes |
+| `avg_speed` | Mouse movement speed |
+| `max_x`, `max_y` | Maximum mouse coordinates |
+| `min_x`, `min_y` | Minimum mouse coordinates |
+
+## 🛠️ Installation & Setup
+
+### Prerequisites
+- Python 3.8+
+- Node.js 14+ (for React frontend)
+- pip (Python package manager)
+- npm (Node.js package manager)
+
+### 1. Clone the Repository
+```bash
+git clone <repository-url>
+cd bot-detector
+```
+
+### 2. Set Up Python Environment
+```bash
+# Create virtual environment
+python -m venv venv
+
+# Activate virtual environment
+# Windows:
+venv\Scripts\activate
+# macOS/Linux:
+source venv/bin/activate
+
+# Install Python dependencies
+pip install -r requirements.txt
+```
+
+### 3. Set Up Frontend (Optional)
+```bash
+cd frontend
+npm install
+cd ..
+```
+
+## 🚀 Quick Start
+
+### Option 1: Use the Startup Script (Recommended)
+```bash
+python start_app.py
+```
+This will:
+- ✅ Check all dependencies
+- ✅ Start Flask backend on port 5000
+- ✅ Start React frontend on port 3000
+- ✅ Open browser automatically
+
+### Option 2: Manual Start
+```bash
+# Terminal 1: Start Flask backend
+python app.py
+
+# Terminal 2: Start React frontend (optional)
+cd frontend
+npm start
+```
+
+## 🌐 Access the Application
+
+### Web Interfaces
+- **Flask Interface**: http://localhost:5000
+- **React Interface**: http://localhost:3000
+
+### API Endpoints
+- `GET /` - Web interface
+- `POST /api/detect` - Bot detection
+- `GET /api/health` - Health check
+- `GET /api/model-info` - Model information
+- `GET /api/sample-data` - Sample test data
+
+## 🧪 Testing the System
+
+### Using the Web Interface
+1. **Load Sample Data**: Click "Load Sample Data" button
+2. **Test Detection**: Click "Detect Bot" to analyze
+3. **View Results**: See prediction, confidence, and feature importance
+
+### Using curl (Command Line)
+```bash
+# Test with sample data
+curl -X POST http://localhost:5000/api/detect \
+  -H "Content-Type: application/json" \
+  -d '{
+    "mouse_movements": {
+      "total_behaviour": ["m", "m", "c(l)", "m", "m"],
+      "mousemove_times": ["(0.1)", "(0.3)", "(0.5)", "(0.8)", "(1.2)"],
+      "mousemove_total_behaviour": ["(100,200)", "(150,250)", "(200,300)", "(250,350)", "(300,400)"]
+    },
+    "web_logs": [
+      {
+        "session_id": "test",
+        "ip_address": "192.168.1.100",
+        "timestamp_str": "01/Jan/2024:10:30:15 +0000",
+        "method": "GET",
+        "path": "/product/123",
+        "status_code": 200,
+        "bytes_sent": 1024,
+        "referer": "https://example.com/",
+        "user_agent": "Mozilla/5.0"
+      }
+    ]
+  }'
+```
+
+## 📈 Sample Results
+
+### Bot Detection Example
+```
+Prediction: Bot
+Confidence: 57.0%
+
+Probabilities:
+- Human: 43.0%
+- Bot: 57.0%
+
+Key Features:
+- num_left_clicks: 15.0%
+- avg_bytes_sent: 11.0%
+- avg_speed: 10.0%
+```
+
+## 🔧 Configuration
+
+### Model Configuration
+- **Model Type**: RandomForest Classifier
+- **Features**: 11 behavioral features
+- **Training**: Federated learning across multiple retailers
+- **Updates**: Model improves with new data
+
+### API Configuration
+- **Port**: 5000 (Flask), 3000 (React)
+- **CORS**: Enabled for cross-origin requests
+- **Debug**: Enabled for development
 
 ## 📁 Project Structure
 
 ```
 bot-detector/
-├── client.py                  # Client-side FL logic
-├── server.py                  # Server-side FL logic
-├── run.py                     # FL runner script
-├── run_federated_learning.py  # Master orchestration script
-├── README.md                  # Project documentation
-├── venv/                      # Virtual environment (ignored by Git)
-│
-├── dataset/
-│   ├── partition/
-│   │   ├── client_1/
-│   │   │   └── phase1/
-│   │   │       ├── annotations/
-│   │   │       └── data/
-│   │   ├── client_2/
-│   │   │   └── phase1/
-│   │   │       ├── annotations/
-│   │   │       └── data/
-│   │   └── client_3/
-│   │       └── phase1/
-│   │           ├── annotations/
-│   │           └── data/
-│   └── phase2/                # Download separately
-│       ├── annotations/
-│       └── data/
-│
-├── client_updates/            # Encrypted updates from clients
-│   ├── client_update_client_1_round_1.enc
-│   └── ...
-│
-├── global_models/             # Aggregated global model files
-│   ├── global_model_params_round_1.pkl
-│   └── ...
-│
-├── scripts/
-│   ├── fed_split.py           # Optional partitioning script
-│   ├── key.py                 # Encryption key generator
-│   └── run.py                 # Simulation control script
+├── app.py                 # Main Flask application
+├── start_app.py          # Startup script
+├── model/
+│   └── simple_test_model.joblib  # Trained model
+├── templates/
+│   └── index.html        # Flask web interface
+├── frontend/             # React application
+├── requirements.txt      # Python dependencies
+└── README.md            # This file
+```
 
+## 🤝 Contributing
 
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Test thoroughly
+5. Submit a pull request
 
-## 🚀 Setup Instructions
+## 📄 License
 
-### Clone the Repo
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## 🆘 Troubleshooting
+
+### Common Issues
+
+**Port Already in Use**
 ```bash
-git clone https://github.com/ibhoomi16/bot.git
-cd bot
+# Kill process on port 5000
+netstat -ano | findstr :5000
+taskkill /PID <PID> /F
 ```
 
-### Create and Activate Virtual Environment
+**Model Not Found**
 ```bash
-python -m venv venv
-# Windows
-.env\Scriptsctivate
-# macOS/Linux
-source venv/bin/activate
+# Ensure model file exists
+ls model/simple_test_model.joblib
 ```
 
-### Install Dependencies
+**Frontend Dependencies**
 ```bash
-pip install pandas numpy scikit-learn tqdm cryptography
+cd frontend
+npm install
 ```
 
----
+### Getting Help
+- Check the browser console for JavaScript errors
+- Review Flask logs for backend issues
+- Ensure all dependencies are installed
+- Verify model file exists in `model/` directory
 
-## 🔐 Set Up Encryption
+## 🎉 Success!
 
-### Generate Key
-```bash
-python scripts/key.py
-```
-Copy the generated key (starts with `b'...`).
+Your bot detection system is now ready to:
+- ✅ Detect sophisticated bots in real-time
+- ✅ Preserve customer privacy
+- ✅ Collaborate across multiple retailers
+- ✅ Provide detailed behavioral analysis
 
-### Paste Key in `client.py` and `server.py`
-Replace:
-```python
-ENCRYPTION_KEY = b'YOUR_GENERATED_KEY_HERE'
-```
-
----
-
-## ▶️ Run the Simulation
-Make sure `(venv)` is active and run:
-```bash
-python scripts/run.py
-```
-
----
-
-## 📊 Output Breakdown
-
-- **Encrypted client updates** → `client_updates/client_update_client_X_round_Y.enc`
-- **Global models** → `global_models/global_model_params_round_Y.pkl`
-
-
----
-
-## ⚙️ Customization
-
-You can modify in `run_federated_learning.py`:
-- `NUM_FL_ROUNDS`
-- `CLIENT_IDS`
-
-In `client.py`:
-- `DP_NOISE_SCALE` – Tune for privacy-accuracy trade-off
+**Happy bot hunting!** 🚀

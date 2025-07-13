@@ -1,6 +1,9 @@
+pandas
+numpy
+scikit-learn
+tqdm
+cryptography
+xgboost
 flask
 flask-cors
-flask-socketio
-scikit-learn
-eventlet
 joblib

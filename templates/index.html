@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bot Detection System - Federated Learning</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --success-color: #27ae60;
+            --danger-color: #e74c3c;
+            --warning-color: #f39c12;
+            --light-bg: #f8f9fa;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .navbar-brand {
+            font-weight: bold;
+            font-size: 1.5rem;
+        }
+        
+        .hero-section {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 3rem;
+            margin: 2rem 0;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        
+        .feature-card {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            margin: 1rem 0;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .detection-section {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            margin: 2rem 0;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        
+        .result-card {
+            border-radius: 15px;
+            padding: 2rem;
+            margin: 1rem 0;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        .bot-result {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            color: white;
+        }
+        
+        .human-result {
+            background: linear-gradient(135deg, #00b894, #00a085);
+            color: white;
+        }
+        
+        .confidence-bar {
+            height: 20px;
+            border-radius: 10px;
+            background: #e9ecef;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        
+        .confidence-fill {
+            height: 100%;
+            transition: width 0.5s ease;
+        }
+        
+        .feature-importance {
+            background: rgba(255,255,255,0.1);
+            padding: 10px;
+            border-radius: 8px;
+            margin: 5px 0;
+        }
+        
+        .loading {
+            display: none;
+        }
+        
+        .spinner-border {
+            width: 3rem;
+            height: 3rem;
+        }
+        
+        .problem-section {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 2rem;
+            margin: 2rem 0;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        
+        .solution-section {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 2rem;
+            margin: 2rem 0;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark" style="background-color: var(--primary-color);">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-shield-alt me-2"></i>
+                Bot Detection System
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#problem">Problem</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#solution">Solution</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#detection">Detection</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <!-- Alert Container -->
+        <div id="alertContainer"></div>
+        
+        <!-- Hero Section -->
+        <div class="hero-section text-center">
+            <h1 class="display-4 mb-4">
+                <i class="fas fa-robot text-danger me-3"></i>
+                Advanced Bot Detection
+            </h1>
+            <p class="lead mb-4">
+                Using Federated Learning to detect sophisticated bots while preserving privacy
+            </p>
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="feature-card text-center">
+                        <i class="fas fa-users fa-3x text-primary mb-3"></i>
+                        <h5>Multi-Retailer Collaboration</h5>
+                        <p>Multiple retailers work together without sharing sensitive data</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="feature-card text-center">
+                        <i class="fas fa-lock fa-3x text-success mb-3"></i>
+                        <h5>Privacy Preserved</h5>
+                        <p>Data never leaves the original organization</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="feature-card text-center">
+                        <i class="fas fa-brain fa-3x text-warning mb-3"></i>
+                        <h5>AI-Powered</h5>
+                        <p>Advanced machine learning detects sophisticated bots</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Problem Section -->
+        <div id="problem" class="problem-section">
+            <h2 class="text-center mb-4">
+                <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+                The Problem: Grinch Bots
+            </h2>
+            <div class="row">
+                <div class="col-md-6">
+                    <h4>What are Grinch Bots?</h4>
+                    <p>Grinch bots are sophisticated automated programs that:</p>
+                    <ul>
+                        <li>Flood online stores during high-demand periods</li>
+                        <li>Automatically purchase limited items before humans can</li>
+                        <li>Use advanced techniques to mimic human behavior</li>
+                        <li>Resell items at inflated prices</li>
+                        <li>Cause frustration for legitimate customers</li>
+                    </ul>
+                </div>
+                <div class="col-md-6">
+                    <h4>Why Traditional Detection Fails</h4>
+                    <ul>
+                        <li>Bots evolve rapidly to bypass simple rules</li>
+                        <li>Individual retailers lack sufficient data</li>
+                        <li>Privacy concerns prevent data sharing</li>
+                        <li>Detection methods become outdated quickly</li>
+                        <li>False positives hurt legitimate customers</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Solution Section -->
+        <div id="solution" class="solution-section">
+            <h2 class="text-center mb-4">
+                <i class="fas fa-lightbulb text-success me-2"></i>
+                The Solution: Federated Learning
+            </h2>
+            <div class="row">
+                <div class="col-md-6">
+                    <h4>How Federated Learning Works</h4>
+                    <ol>
+                        <li><strong>Local Training:</strong> Each retailer trains on their own data</li>
+                        <li><strong>Model Updates:</strong> Only model updates are shared (not raw data)</li>
+                        <li><strong>Global Aggregation:</strong> Server combines updates from all retailers</li>
+                        <li><strong>Distribution:</strong> Improved model is sent back to all retailers</li>
+                        <li><strong>Privacy Preserved:</strong> Raw customer data never leaves the organization</li>
+                    </ol>
+                </div>
+                <div class="col-md-6">
+                    <h4>Benefits</h4>
+                    <ul>
+                        <li><strong>Privacy:</strong> Customer data stays within each organization</li>
+                        <li><strong>Collaboration:</strong> Multiple retailers improve detection together</li>
+                        <li><strong>Scalability:</strong> More participants = better detection</li>
+                        <li><strong>Adaptability:</strong> Model continuously improves with new data</li>
+                        <li><strong>Compliance:</strong> Meets data protection regulations</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Detection Section -->
+        <div id="detection" class="detection-section">
+            <h2 class="text-center mb-4">
+                <i class="fas fa-search text-primary me-2"></i>
+                Live Bot Detection
+            </h2>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <h4>Test the Model</h4>
+                    <p>Upload mouse movement and web log data to test our bot detection system:</p>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Mouse Movement Data (JSON)</label>
+                        <textarea class="form-control" id="mouseData" rows="6" placeholder="Paste mouse movement JSON data here..."></textarea>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Web Log Data (JSON)</label>
+                        <textarea class="form-control" id="webLogData" rows="6" placeholder="Paste web log JSON data here..."></textarea>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-primary btn-lg" onclick="loadSampleData()">
+                            <i class="fas fa-download me-2"></i>Load Sample Data
+                        </button>
+                        <button class="btn btn-warning btn-lg" onclick="formatJSON()">
+                            <i class="fas fa-code me-2"></i>Format JSON
+                        </button>
+                        <button class="btn btn-success btn-lg" onclick="detectBot()">
+                            <i class="fas fa-search me-2"></i>Detect Bot
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <div id="loading" class="loading text-center">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="mt-3">Analyzing behavior patterns...</p>
+                    </div>
+                    
+                    <div id="result" style="display: none;">
+                        <h4>Detection Result</h4>
+                        <div id="resultCard" class="result-card">
+                            <!-- Result content will be inserted here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        async function loadSampleData() {
+            try {
+                const response = await fetch('/api/sample-data');
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                const data = await response.json();
+                
+                document.getElementById('mouseData').value = JSON.stringify(data.mouse_movements, null, 2);
+                document.getElementById('webLogData').value = JSON.stringify(data.web_logs, null, 2);
+                
+                showAlert('Sample data loaded successfully!', 'success');
+            } catch (error) {
+                console.error('Error loading sample data:', error);
+                showAlert('Failed to load sample data: ' + error.message, 'danger');
+            }
+        }
+
+        async function detectBot() {
+            const mouseData = document.getElementById('mouseData').value;
+            const webLogData = document.getElementById('webLogData').value;
+            
+            if (!mouseData || !webLogData) {
+                showAlert('Please provide both mouse movement and web log data', 'warning');
+                return;
+            }
+            
+            try {
+                // Validate JSON before sending
+                let mouseDataParsed, webLogDataParsed;
+                
+                try {
+                    mouseDataParsed = JSON.parse(mouseData);
+                } catch (error) {
+                    showAlert('Invalid JSON in Mouse Movement Data: ' + error.message, 'danger');
+                    return;
+                }
+                
+                try {
+                    webLogDataParsed = JSON.parse(webLogData);
+                } catch (error) {
+                    showAlert('Invalid JSON in Web Log Data: ' + error.message, 'danger');
+                    return;
+                }
+                
+                // Show loading
+                document.getElementById('loading').style.display = 'block';
+                document.getElementById('result').style.display = 'none';
+                
+                const requestData = {
+                    mouse_movements: mouseDataParsed,
+                    web_logs: webLogDataParsed
+                };
+                
+                const response = await fetch('/api/detect', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(requestData)
+                });
+                
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+                    throw new Error(`HTTP ${response.status}: ${errorData.error || response.statusText}`);
+                }
+                
+                const result = await response.json();
+                displayResult(result);
+            } catch (error) {
+                console.error('Error during detection:', error);
+                showAlert('Error during detection: ' + error.message, 'danger');
+            } finally {
+                document.getElementById('loading').style.display = 'none';
+            }
+        }
+
+        function formatJSON() {
+            try {
+                const mouseData = document.getElementById('mouseData').value;
+                const webLogData = document.getElementById('webLogData').value;
+                
+                if (mouseData.trim()) {
+                    const formattedMouse = JSON.stringify(JSON.parse(mouseData), null, 2);
+                    document.getElementById('mouseData').value = formattedMouse;
+                }
+                
+                if (webLogData.trim()) {
+                    const formattedWebLog = JSON.stringify(JSON.parse(webLogData), null, 2);
+                    document.getElementById('webLogData').value = formattedWebLog;
+                }
+                
+                showAlert('JSON formatted successfully!', 'success');
+            } catch (error) {
+                showAlert('Invalid JSON found: ' + error.message, 'danger');
+            }
+        }
+
+        function displayResult(result) {
+            const resultCard = document.getElementById('resultCard');
+            const isBot = result.prediction === 1;
+            
+            resultCard.className = `result-card ${isBot ? 'bot-result' : 'human-result'}`;
+            
+            resultCard.innerHTML = `
+                <div class="text-center mb-4">
+                    <i class="fas fa-${isBot ? 'robot' : 'user'} fa-3x mb-3"></i>
+                    <h3>${result.prediction_label}</h3>
+                    <p class="lead">Confidence: ${(result.confidence * 100).toFixed(1)}%</p>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <h5>Probabilities</h5>
+                        <div class="mb-3">
+                            <label>Human: ${(result.human_probability * 100).toFixed(1)}%</label>
+                            <div class="confidence-bar">
+                                <div class="confidence-fill bg-success" style="width: ${result.human_probability * 100}%"></div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label>Bot: ${(result.bot_probability * 100).toFixed(1)}%</label>
+                            <div class="confidence-bar">
+                                <div class="confidence-fill bg-danger" style="width: ${result.bot_probability * 100}%"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <h5>Key Features</h5>
+                        <div id="featureList">
+                            ${result.top_features.map(feature => `
+                                <div class="feature-importance">
+                                    <strong>${feature.name}:</strong> ${(feature.importance * 100).toFixed(1)}%
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="text-center mt-3">
+                    <small class="text-muted">Analysis completed at ${new Date(result.timestamp).toLocaleString()}</small>
+                </div>
+            `;
+            
+            document.getElementById('result').style.display = 'block';
+        }
+
+        function showAlert(message, type) {
+            const alertContainer = document.getElementById('alertContainer');
+            if (!alertContainer) {
+                console.error('Alert container not found');
+                return;
+            }
+            
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+            alertDiv.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            
+            alertContainer.appendChild(alertDiv);
+            
+            setTimeout(() => {
+                if (alertDiv.parentNode) {
+                    alertDiv.remove();
+                }
+            }, 5000);
+        }
+
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html> 
